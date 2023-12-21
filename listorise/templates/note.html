@@ -1,0 +1,25 @@
+<!-- template.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Listorise {{.Title}}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"
+    />
+  </head>
+  <body>
+    <h1>{{.Title}}</h1>
+    <textarea id="editor" readonly>{{.Body}}</textarea>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var editor = new SimpleMDE({
+          element: document.getElementById("editor"),
+          readOnly: true,
+        });
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+  </body>
+</html>
