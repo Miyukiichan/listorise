@@ -24,7 +24,7 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid list ID", http.StatusBadRequest)
 		return
 	}
-	rows , err := DB().Query("select Id, Name from ListItems where Id = ?", id)
+	rows , err := DB().Query("select Id, Name from Lists where Id = ?", id)
 	if (err != nil) {
 		http.Error(w, "No such list", http.StatusNotFound)
 		return;

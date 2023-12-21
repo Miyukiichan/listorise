@@ -12,8 +12,44 @@ import (
 
 func main() {
 	var db = handlers.DB();
-	db.Exec("create table Notes (Id integer primary key autoincrement, Body text, Title text)")
-	db.Exec("create table ListItems (Id integer, Name text)")
+	db.Exec(`create table Lookups (
+		Id integer primary key autoincrement, 
+		Name text
+	)`)
+	db.Exec(`create table LookupOptions (
+		Id integer primary key autoincrement, 
+		LookupId integer not null,
+		Name text not null,
+		foreign key (LookupId) references Lookups (Id)
+	)`)
+	db.Exec(`create table Notes (
+		Id integer primary key autoincrement, 
+		Body text, 
+		Title text
+	)`)
+	db.Exec(`create table Lists (
+		Id integer primary key autoincrement, 
+		Name text
+	)`)
+	db.Exec(`create table ListColumns (
+		Id integer primary key autoincrement, 
+		Name text not null, 
+		Type integer not null, 
+		ListId integer not null, 
+		LookupId integer,
+		foreign key (ListId) references Lists (Id),
+		foreign key (LookupId) references Lookups (Id)
+	)`)
+	db.Exec(`create table ListValues (
+		Id integer primary key autoincrement, 
+		Value string, 
+		ListColumnId integer not null, 
+		NoteId integer, 
+		ListId integer,
+		foreign key (ListColumnId) references ListColumns (Id),
+		foreign key (NoteId) references Notes (Id),
+		foreign key (ListId) references Lists (Id) -- This is the list that we link to, not the parent list
+	)`)
 
 	router := mux.NewRouter()
 
