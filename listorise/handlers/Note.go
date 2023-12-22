@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/Miyukiichan/listorise/model"
+	"github.com/Miyukiichan/listorise/model/entities"
 	"github.com/blockloop/scan"
 	"github.com/gorilla/mux"
 )
@@ -24,7 +24,7 @@ func GetNoteById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	row , _ := DB().Query("select Id, Title, Body from Notes where Id = ?", noteID)
-	var note model.Note
+	var note entities.Note
 	err = scan.Row(&note, row)
 	row.Close()
 	if err == sql.ErrNoRows {

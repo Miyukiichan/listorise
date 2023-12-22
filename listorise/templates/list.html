@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Listorise {{.Id}}</title>
+    <title>List - {{.Name}}</title>
     <link
       rel="stylesheet"
       href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css"
@@ -10,8 +10,8 @@
     <script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
   </head>
   <body>
+    <h1>{{.Name}}</h1>
     <div id="grid"></div>
-
     <script>
       document.addEventListener('DOMContentLoaded', function() {
           var container = document.getElementById('grid');
@@ -19,11 +19,11 @@
           grid = new tui.Grid({
             el: container,
             data: data,
-            columns: [
-                { header: 'Name', name: 'Name' },
-            ],
+            columns: {{.Columns}}
           });
           tui.Grid.applyTheme("clean");
+          grid.hideColumn("-2"); //Note Id
+          grid.hideColumn("-3"); //List Id
       });
     </script>
   </body>

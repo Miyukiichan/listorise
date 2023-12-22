@@ -18,14 +18,14 @@ func main() {
 	)`)
 	db.Exec(`create table LookupOptions (
 		Id integer primary key autoincrement, 
-		LookupId integer not null,
 		Name text not null,
+		LookupId integer not null,
 		foreign key (LookupId) references Lookups (Id)
 	)`)
 	db.Exec(`create table Notes (
 		Id integer primary key autoincrement, 
-		Body text, 
-		Title text
+		Name text,
+		Body text
 	)`)
 	db.Exec(`create table Lists (
 		Id integer primary key autoincrement, 
@@ -40,24 +40,28 @@ func main() {
 		foreign key (ListId) references Lists (Id),
 		foreign key (LookupId) references Lookups (Id)
 	)`)
-	db.Exec(`create table ListValues (
-		Id integer primary key autoincrement, 
-		Value string, 
-		ListColumnId integer not null, 
+	db.Exec(`create table ListItems (
+		Id integer primary key autoincrement,
+		ListId integer not null,
 		NoteId integer, 
-		ListId integer,
-		foreign key (ListColumnId) references ListColumns (Id),
+		AssociatedListId integer, -- This is the list that we link to, not the associated list that this item belongs to
+		foreign key (ListId) references Lists (Id),
 		foreign key (NoteId) references Notes (Id),
-		foreign key (ListId) references Lists (Id) -- This is the list that we link to, not the parent list
+		foreign key (AssociatedListId) references Lists (Id)
+	)`)
+	db.Exec(`create table ListValues (
+		ListItemId integer not null,
+		ListColumnId integer not null, 
+		Value string, 
+		primary key (ListItemId, ListColumnId),
+		foreign key (ListItemId) references ListItems (Id),
+		foreign key (ListColumnId) references ListColumns (Id)
 	)`)
 
 	router := mux.NewRouter()
 
-	// Route to handle requests for a specific note based on ID
 	router.HandleFunc("/note/{id:[0-9]+}", handlers.GetNoteById).Methods("GET")
 	router.HandleFunc("/list/{id:[0-9]+}", handlers.GetListById).Methods("GET")
-
-	// router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 
 	http.Handle("/", router)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", handlers.Config().Port), nil))

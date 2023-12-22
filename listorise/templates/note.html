@@ -3,14 +3,14 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Listorise {{.Title}}</title>
+    <title>Listorise {{.Name}}</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"
     />
   </head>
   <body>
-    <h1>{{.Title}}</h1>
+    <h1>{{.Name}}</h1>
     <textarea id="editor" readonly>{{.Body}}</textarea>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
