@@ -11,8 +11,55 @@
   </head>
   <body>
     <h1>{{.Name}}</h1>
+    <div style="margin-bottom: 1rem">
+      <button onclick="addNote()">Add Note</button>
+      <button onclick="addList()">Add List</button>
+    </div>
     <div id="grid"></div>
     <script>
+      function addNote(event) {
+        var name = prompt("Note Name");
+        var noteDTO = {
+          ListId: {{.Id}},
+          Name: name,
+        };
+        var response = fetch("/api/note", {
+          method: "POST",
+          body: JSON.stringify(noteDTO),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        }).then((response) => {
+          if (response.status != 201) {
+            response.text().then((message) => alert(message))
+          }
+          else {
+            location.reload();
+          }
+        });
+      }
+
+      function addList(event) {
+        var name = prompt("List Name");
+        var listDTO = {
+          ListId: {{.Id}},
+          Name: name,
+        };
+        var response = fetch("/api/list", {
+          method: "POST",
+          body: JSON.stringify(listDTO),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        }).then((response) => {
+          if (response.status != 201) {
+            response.text().then((message) => alert(message))
+          }
+          else {
+            location.reload();
+          }
+        });
+      }
       document.addEventListener('DOMContentLoaded', function() {
           var container = document.getElementById('grid');
           var data = {{.Items}};

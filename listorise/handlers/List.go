@@ -157,3 +157,61 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 	tmpl.Execute(w, listDTO)
 }
+
+func AddNote(w http.ResponseWriter, r *http.Request) {
+	var noteDTO dto.NewNoteDTO
+	err := json.NewDecoder(r.Body).Decode(&noteDTO); 
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if (noteDTO.ListId == 0) {
+		http.Error(w, "No list provided", http.StatusBadRequest)
+		return;
+	}
+	res, err := DB().Exec("insert into Notes (Name) values (?)", noteDTO.Name)
+	if err != nil {
+		http.Error(w, "Error creating note", http.StatusInternalServerError)
+		return
+	}
+	noteId, err := res.LastInsertId()
+	if err != nil {
+		http.Error(w, "Error linking new note with list", http.StatusInternalServerError)
+		return
+	}
+	res, err = DB().Exec("insert into ListItems (ListId, NoteId) values (?, ?)", noteDTO.ListId, noteId)
+	if (err != nil) {
+		http.Error(w, "Error linking new note with list", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+func AddList(w http.ResponseWriter, r *http.Request) {
+	var listDTO dto.NewListDTO
+	err := json.NewDecoder(r.Body).Decode(&listDTO); 
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if (listDTO.ListId == 0) {
+		http.Error(w, "No parent list provided", http.StatusBadRequest)
+		return;
+	}
+	res, err := DB().Exec("insert into Lists (Name) values (?)", listDTO.Name)
+	if err != nil {
+		http.Error(w, "Error creating list", http.StatusInternalServerError)
+		return
+	}
+	listId, err := res.LastInsertId()
+	if err != nil {
+		http.Error(w, "Error linking new list with parent list", http.StatusInternalServerError)
+		return
+	}
+	res, err = DB().Exec("insert into ListItems (ListId, AssociatedListId) values (?, ?)", listDTO.ListId, listId)
+	if (err != nil) {
+		http.Error(w, "Error linking new list with parent list", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}

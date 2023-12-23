@@ -62,6 +62,8 @@ func main() {
 
 	router.HandleFunc("/note/{id:[0-9]+}", handlers.GetNoteById).Methods("GET")
 	router.HandleFunc("/list/{id:[0-9]+}", handlers.GetListById).Methods("GET")
+	router.HandleFunc("/api/note", handlers.AddNote).Methods("POST")
+	router.HandleFunc("/api/list", handlers.AddList).Methods("POST")
 
 	http.Handle("/", router)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", handlers.Config().Port), nil))
