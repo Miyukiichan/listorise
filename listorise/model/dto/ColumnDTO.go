@@ -20,4 +20,5 @@ type ColumnDTO struct {
 	Header string `json:"header"`
 	Name string `json:"name"`
 	Editor *ColumnEditorDTO `json:"editor"`
+	Sortable bool `json:"sortable"`
 }
