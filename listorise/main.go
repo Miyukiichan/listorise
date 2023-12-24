@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	var db = handlers.DB();
+	var db = handlers.DB()
 	db.Exec(`create table Lookups (
 		Id integer primary key autoincrement, 
 		Name text
@@ -68,4 +68,3 @@ func main() {
 	http.Handle("/", router)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", handlers.Config().Port), nil))
 }
-

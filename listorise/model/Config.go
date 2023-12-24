@@ -2,5 +2,5 @@ package model
 
 type Config struct {
 	DatabasePath string
-	Port string
+	Port         string
 }

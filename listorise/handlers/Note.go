@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"text/template"
 
+	"github.com/Miyukiichan/listorise/model/dto"
 	"github.com/Miyukiichan/listorise/model/entities"
 	"github.com/blockloop/scan"
 	"github.com/gorilla/mux"
@@ -23,15 +24,23 @@ func GetNoteById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid note ID", http.StatusBadRequest)
 		return
 	}
-	row , _ := DB().Query("select Id, Title, Body from Notes where Id = ?", noteID)
-	var note entities.Note
-	err = scan.Row(&note, row)
-	row.Close()
+	row, err := DB().Query("select * from Notes where Id = ?", noteID)
 	if err == sql.ErrNoRows {
 		http.Error(w, "Note not found", http.StatusNotFound)
 		return
 	} else if err != nil {
 		log.Fatal(err)
 	}
-	tmpl.Execute(w, note)
+	var note entities.Note
+	err = scan.Row(&note, row)
+	if err != nil {
+		log.Fatal(err)
+	}
+	noteDTO := dto.NoteDTO{
+		Id:   note.ID,
+		Name: note.Name.String,
+		Body: note.Body.String,
+	}
+	row.Close()
+	tmpl.Execute(w, noteDTO)
 }

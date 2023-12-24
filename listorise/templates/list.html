@@ -4,21 +4,34 @@
   <head>
     <title>List - {{.Name}}</title>
     <link
+      href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_materialize.min.css"
       rel="stylesheet"
-      href="https://uicdn.toast.com/tui.grid/latest/tui-grid.css"
     />
-    <script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
   </head>
   <body>
-    <h1>{{.Name}}</h1>
-    <div style="margin-bottom: 1rem">
-      <button onclick="addNote()">Add Note</button>
-      <button onclick="addList()">Add List</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"
+    ></script>
+    <h1 style="margin-left: 1rem">{{.Name}}</h1>
+    <div style="margin-bottom: 1rem; margin-left: 1rem">
+      <button class="waves-effect waves-light btn" onclick="addNote()">
+        Add Note
+      </button>
+      <button class="waves-effect waves-light btn" onclick="addList()">
+        Add List
+      </button>
     </div>
     <div id="grid"></div>
     <script>
       function addNote(event) {
         var name = prompt("Note Name");
+        if (!name) return;
         var noteDTO = {
           ListId: {{.Id}},
           Name: name,
@@ -41,6 +54,7 @@
 
       function addList(event) {
         var name = prompt("List Name");
+        if (!name) return;
         var listDTO = {
           ListId: {{.Id}},
           Name: name,
@@ -61,18 +75,23 @@
         });
       }
       document.addEventListener('DOMContentLoaded', function() {
-          var container = document.getElementById('grid');
-          var data = {{.Items}};
-          grid = new tui.Grid({
-            el: container,
-            data: data,
-            columns: {{.Columns}}
-          });
-          tui.Grid.applyTheme("clean");
-          grid.hideColumn("-2"); //Note Id
-          grid.hideColumn("-3"); //List Id
-          grid.hideColumn("-4"); //Item Id
-          grid.sort("-1", true);
+        var table = new Tabulator("#grid", {
+          data: {{.Items}},
+          layout: "fitColumns",
+          columns: {{.Columns}},
+          initialSort: [
+            {column: "-1", dir: "asc"}
+          ]
+        });
+        table.on("rowDblClick", (event, row) => {
+          var data = row.getData();
+          if (data["-2"]) {
+            window.location.href = `${window.location.origin}/note/${data["-2"]}`
+          }
+          else {
+            window.location.href = `${window.location.origin}/list/${data["-3"]}`
+          }
+        })
       });
     </script>
   </body>

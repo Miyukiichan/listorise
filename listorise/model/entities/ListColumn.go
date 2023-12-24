@@ -17,9 +17,9 @@ const (
 )
 
 type ListColumn struct {
-	Id int 
-	Name string
-	Type ColumnType
-	ListId int
+	Id       int
+	Name     string
+	Type     ColumnType
+	ListId   int
 	LookupId sql.NullInt64
 }

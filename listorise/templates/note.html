@@ -6,12 +6,19 @@
     <title>Listorise {{.Name}}</title>
     <link
       rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+    <link
+      rel="stylesheet"
       href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"
     />
   </head>
   <body>
-    <h1>{{.Name}}</h1>
-    <textarea id="editor" readonly>{{.Body}}</textarea>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <h1 style="margin-left: 1rem">{{.Name}}</h1>
+    <div style="margin: 1rem">
+      <textarea id="editor" readonly>{{.Body}}</textarea>
+    </div>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var editor = new SimpleMDE({

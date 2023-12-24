@@ -3,6 +3,6 @@ package entities
 import "database/sql"
 
 type List struct {
-	Id int
+	Id   int
 	Name sql.NullString
 }

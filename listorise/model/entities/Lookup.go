@@ -1,6 +1,6 @@
 package entities
 
 type Lookup struct {
-	Id int
+	Id   int
 	Name string
 }

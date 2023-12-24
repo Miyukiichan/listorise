@@ -2,5 +2,5 @@ package dto
 
 type NewListDTO struct {
 	ListId int
-	Name string
+	Name   string
 }

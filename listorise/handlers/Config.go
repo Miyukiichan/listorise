@@ -13,20 +13,20 @@ func Config() model.Config {
 	file, err := os.Open("conf.json")
 	var config model.Config = model.Config{
 		DatabasePath: "listorise.db",
-		Port: "6573",
+		Port:         "6573",
 	}
-	if (err == nil) {
+	if err == nil {
 		decoder := json.NewDecoder(file)
 		file.Close()
 		c := model.Config{}
 		err = decoder.Decode(&c)
-		if (err == nil) {
-			if (config.DatabasePath != "") {
+		if err == nil {
+			if config.DatabasePath != "" {
 				config.DatabasePath = c.DatabasePath
 			}
-			if (c.Port != "") {
+			if c.Port != "" {
 				_, err := strconv.Atoi(c.Port)
-				if (err != nil) {
+				if err != nil {
 					log.Fatal(err)
 				}
 				config.Port = c.Port

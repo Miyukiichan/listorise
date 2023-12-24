@@ -3,7 +3,7 @@ package entities
 import "database/sql"
 
 type ListValue struct {
-	ListItemId int
+	ListItemId   int
 	ListColumnId int
-	Value sql.NullString 
+	Value        sql.NullString
 }

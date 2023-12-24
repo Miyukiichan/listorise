@@ -35,7 +35,7 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 	} else if err != nil {
 		log.Fatal(err)
 	}
-	listDTO := dto.ListDTO {
+	listDTO := dto.ListDTO{
 		Id: id,
 	}
 	listDTO.Name = listName
@@ -43,58 +43,62 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 	// Get Columns + include special columns for the name, associate list and note for navigation
 	var columns []entities.ListColumn
 	var columnDTOs []dto.ColumnDTO
-	columnDTOs = append(columnDTOs, dto.ColumnDTO { 
-		Header: "Name", 
-		Name: "-1", 
-		Sortable: true,
+	columnDTOs = append(columnDTOs, dto.ColumnDTO{
+		Title:   "Name",
+		Field:   "-1",
+		Sorter:  "string",
+		Visible: true,
 	})
-	columnDTOs = append(columnDTOs, dto.ColumnDTO { 
-		Header: "NoteId", 
-		Name: "-2", 
-		Sortable: true,
+	columnDTOs = append(columnDTOs, dto.ColumnDTO{
+		Title:   "NoteId",
+		Field:   "-2",
+		Sorter:  "string",
+		Visible: false,
 	})
-	columnDTOs = append(columnDTOs, dto.ColumnDTO { 
-		Header: "AssociatedListId", 
-		Name: "-3", 
-		Sortable: true,
+	columnDTOs = append(columnDTOs, dto.ColumnDTO{
+		Title:   "AssociatedListId",
+		Field:   "-3",
+		Sorter:  "string",
+		Visible: false,
 	})
-	columnDTOs = append(columnDTOs, dto.ColumnDTO { 
-		Header: "ItemId", 
-		Name: "-4", 
-		Sortable: true,
-	}) 
+	columnDTOs = append(columnDTOs, dto.ColumnDTO{
+		Title:   "ItemId",
+		Field:   "-4",
+		Sorter:  "string",
+		Visible: false,
+	})
 	rows, err := DB().Query("select * from ListColumns where ListId = ?", id)
-	if (err != nil && err != sql.ErrNoRows) {
+	if err != nil && err != sql.ErrNoRows {
 		log.Fatal()
 	}
 	err = scan.Rows(&columns, rows)
-	if (err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
 	for _, column := range columns {
-		columnDTO := dto.ColumnDTO {
+		columnDTO := dto.ColumnDTO{
 			// Use the column Id as this is a unique name
 			// The name is never visible - it's an internal reference for the data objects in toast ui
-			Name: strconv.Itoa(column.Id), 
-			Header: column.Name,
-			Editor: nil,
-			Sortable: true,
+			Title:   column.Name,
+			Field:   strconv.Itoa(column.Id),
+			Sorter:  "string",
+			Visible: true,
 		}
 		columnDTOs = append(columnDTOs, columnDTO)
 	}
 	s, err := json.Marshal(columnDTOs)
-	if (err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
 	listDTO.Columns = template.JS(s)
 
 	itemMap := map[int]map[string]string{}
-	
+
 	var listItems []struct {
-		Id int
-		NoteId sql.NullInt64
-		AssociatedListId sql.NullInt64
-		NoteName sql.NullString
+		Id                 int
+		NoteId             sql.NullInt64
+		AssociatedListId   sql.NullInt64
+		NoteName           sql.NullString
 		AssociatedListName sql.NullString
 	}
 	rows, err = DB().Query(`
@@ -104,14 +108,14 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 		left join Lists as l on l.Id = i.AssociatedListId 
 		where ListId = ?
 	`, id)
-	if (err != nil && err != sql.ErrNoRows) {
+	if err != nil && err != sql.ErrNoRows {
 		log.Fatal()
 	}
 	err = scan.Rows(&listItems, rows)
-	if (err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
-	for _, item := range(listItems) {
+	for _, item := range listItems {
 		itemMap[item.Id] = map[string]string{}
 		itemMap[item.Id]["-4"] = strconv.Itoa(item.Id)
 		if (item.NoteId != sql.NullInt64{}) {
@@ -131,7 +135,7 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 		where c.ListId = ?
 	`, id)
 
-	if (err != nil && err != sql.ErrNoRows) {
+	if err != nil && err != sql.ErrNoRows {
 		log.Fatal()
 	}
 	for rows.Next() {
@@ -149,7 +153,7 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 		itemList = append(itemList, value)
 	}
 	s, err = json.Marshal(itemList)
-	if (err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
 	listDTO.Items = template.JS(s)
@@ -160,14 +164,14 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 
 func AddNote(w http.ResponseWriter, r *http.Request) {
 	var noteDTO dto.NewNoteDTO
-	err := json.NewDecoder(r.Body).Decode(&noteDTO); 
+	err := json.NewDecoder(r.Body).Decode(&noteDTO)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	if (noteDTO.ListId == 0) {
+	if noteDTO.ListId == 0 {
 		http.Error(w, "No list provided", http.StatusBadRequest)
-		return;
+		return
 	}
 	res, err := DB().Exec("insert into Notes (Name) values (?)", noteDTO.Name)
 	if err != nil {
@@ -180,7 +184,7 @@ func AddNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res, err = DB().Exec("insert into ListItems (ListId, NoteId) values (?, ?)", noteDTO.ListId, noteId)
-	if (err != nil) {
+	if err != nil {
 		http.Error(w, "Error linking new note with list", http.StatusInternalServerError)
 		return
 	}
@@ -189,14 +193,14 @@ func AddNote(w http.ResponseWriter, r *http.Request) {
 
 func AddList(w http.ResponseWriter, r *http.Request) {
 	var listDTO dto.NewListDTO
-	err := json.NewDecoder(r.Body).Decode(&listDTO); 
+	err := json.NewDecoder(r.Body).Decode(&listDTO)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	if (listDTO.ListId == 0) {
+	if listDTO.ListId == 0 {
 		http.Error(w, "No parent list provided", http.StatusBadRequest)
-		return;
+		return
 	}
 	res, err := DB().Exec("insert into Lists (Name) values (?)", listDTO.Name)
 	if err != nil {
@@ -209,7 +213,7 @@ func AddList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res, err = DB().Exec("insert into ListItems (ListId, AssociatedListId) values (?, ?)", listDTO.ListId, listId)
-	if (err != nil) {
+	if err != nil {
 		http.Error(w, "Error linking new list with parent list", http.StatusInternalServerError)
 		return
 	}

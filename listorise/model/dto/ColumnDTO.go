@@ -1,24 +1,24 @@
 package dto
 
-type ColumnEditorListItemDTO struct {
-	Text string
-	Value int
-}
+// type ColumnEditorListItemDTO struct {
+// 	Text string
+// 	Value int
+// }
 
-type ColumnEditorOptionsDTO struct {
-	Format string `json:"format"`
-	TimePicker bool `json:"timePicker"`
-	ListItems *[]ColumnEditorListItemDTO `json:"listItems"`
-}
+// type ColumnEditorOptionsDTO struct {
+// 	Format string `json:"format"`
+// 	TimePicker bool `json:"timePicker"`
+// 	ListItems *[]ColumnEditorListItemDTO `json:"listItems"`
+// }
 
-type ColumnEditorDTO struct {
-	Type string `json:"name"`
-	Options *ColumnEditorOptionsDTO `json:"options"`
-}
+// type ColumnEditorDTO struct {
+// 	Type string `json:"name"`
+// 	Options *ColumnEditorOptionsDTO `json:"options"`
+// }
 
 type ColumnDTO struct {
-	Header string `json:"header"`
-	Name string `json:"name"`
-	Editor *ColumnEditorDTO `json:"editor"`
-	Sortable bool `json:"sortable"`
+	Title   string `json:"title"`
+	Field   string `json:"field"`
+	Sorter  string `json:"sorter"`
+	Visible bool   `json:"visible"`
 }
