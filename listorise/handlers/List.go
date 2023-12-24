@@ -14,6 +14,81 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func GetListItems(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid list ID", http.StatusBadRequest)
+		return
+	}
+	itemMap := map[int]map[string]string{}
+
+	var listItems []struct {
+		Id                 int
+		NoteId             sql.NullInt64
+		AssociatedListId   sql.NullInt64
+		NoteName           sql.NullString
+		AssociatedListName sql.NullString
+	}
+	rows, err := DB().Query(`
+		select i.Id, NoteId, AssociatedListId, n.Name as NoteName, l.Name as AssociatedListName 
+		from ListItems as i 
+		left join Notes as n on n.Id = i.NoteId 
+		left join Lists as l on l.Id = i.AssociatedListId 
+		where ListId = ?
+	`, id)
+	if err != nil && err != sql.ErrNoRows {
+		log.Fatal()
+	}
+	err = scan.Rows(&listItems, rows)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, item := range listItems {
+		itemMap[item.Id] = map[string]string{}
+		itemMap[item.Id]["-4"] = strconv.Itoa(item.Id)
+		if (item.NoteId != sql.NullInt64{}) {
+			itemMap[item.Id]["-1"] = item.NoteName.String
+			itemMap[item.Id]["-2"] = strconv.Itoa(int(item.NoteId.Int64))
+		} else {
+			itemMap[item.Id]["-1"] = item.AssociatedListName.String
+			itemMap[item.Id]["-3"] = strconv.Itoa(int(item.AssociatedListId.Int64))
+		}
+	}
+
+	rows, err = DB().Query(`
+		select i.Id as ItemId, c.Id as ColumnId, v.Value 
+		from ListValues as v 
+		join ListItems as i on v.ListItemId = i.Id 
+		join ListColumns as c on i.ListId = c.ListId 
+		where c.ListId = ?
+	`, id)
+
+	if err != nil && err != sql.ErrNoRows {
+		log.Fatal()
+	}
+	for rows.Next() {
+		var itemId int
+		var columnId int
+		var value string
+		err = rows.Scan(&itemId, &columnId, &value)
+		if err != nil {
+			log.Fatal(err)
+		}
+		itemMap[itemId][strconv.Itoa(columnId)] = value
+	}
+	rows.Close()
+	var itemList []map[string]string
+	for _, value := range itemMap {
+		itemList = append(itemList, value)
+	}
+	s, err := json.Marshal(itemList)
+	if err != nil {
+		log.Fatal(err)
+	}
+	w.Write(s)
+}
+
 func GetListById(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("templates/list.html")
 	if err != nil {
@@ -72,6 +147,7 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 		log.Fatal()
 	}
 	err = scan.Rows(&columns, rows)
+	rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,74 +167,6 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	listDTO.Columns = template.JS(s)
-
-	itemMap := map[int]map[string]string{}
-
-	var listItems []struct {
-		Id                 int
-		NoteId             sql.NullInt64
-		AssociatedListId   sql.NullInt64
-		NoteName           sql.NullString
-		AssociatedListName sql.NullString
-	}
-	rows, err = DB().Query(`
-		select i.Id, NoteId, AssociatedListId, n.Name as NoteName, l.Name as AssociatedListName 
-		from ListItems as i 
-		left join Notes as n on n.Id = i.NoteId 
-		left join Lists as l on l.Id = i.AssociatedListId 
-		where ListId = ?
-	`, id)
-	if err != nil && err != sql.ErrNoRows {
-		log.Fatal()
-	}
-	err = scan.Rows(&listItems, rows)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, item := range listItems {
-		itemMap[item.Id] = map[string]string{}
-		itemMap[item.Id]["-4"] = strconv.Itoa(item.Id)
-		if (item.NoteId != sql.NullInt64{}) {
-			itemMap[item.Id]["-1"] = item.NoteName.String
-			itemMap[item.Id]["-2"] = strconv.Itoa(int(item.NoteId.Int64))
-		} else {
-			itemMap[item.Id]["-1"] = item.AssociatedListName.String
-			itemMap[item.Id]["-3"] = strconv.Itoa(int(item.AssociatedListId.Int64))
-		}
-	}
-
-	rows, err = DB().Query(`
-		select i.Id as ItemId, c.Id as ColumnId, v.Value 
-		from ListValues as v 
-		join ListItems as i on v.ListItemId = i.Id 
-		join ListColumns as c on i.ListId = c.ListId 
-		where c.ListId = ?
-	`, id)
-
-	if err != nil && err != sql.ErrNoRows {
-		log.Fatal()
-	}
-	for rows.Next() {
-		var itemId int
-		var columnId int
-		var value string
-		err = rows.Scan(&itemId, &columnId, &value)
-		if err != nil {
-			log.Fatal(err)
-		}
-		itemMap[itemId][strconv.Itoa(columnId)] = value
-	}
-	var itemList []map[string]string
-	for _, value := range itemMap {
-		itemList = append(itemList, value)
-	}
-	s, err = json.Marshal(itemList)
-	if err != nil {
-		log.Fatal(err)
-	}
-	listDTO.Items = template.JS(s)
-
-	rows.Close()
 	tmpl.Execute(w, listDTO)
 }
 

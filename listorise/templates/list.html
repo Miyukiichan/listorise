@@ -11,6 +11,20 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
     />
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #grid {
+        flex-grow: 1;
+      }
+    </style>
   </head>
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
@@ -29,6 +43,7 @@
     </div>
     <div id="grid"></div>
     <script>
+      var table = new Tabulator();
       function addNote(event) {
         var name = prompt("Note Name");
         if (!name) return;
@@ -47,7 +62,7 @@
             response.text().then((message) => alert(message))
           }
           else {
-            location.reload();
+            table.setData();
           }
         });
       }
@@ -70,13 +85,13 @@
             response.text().then((message) => alert(message))
           }
           else {
-            location.reload();
+            table.setData();
           }
         });
       }
       document.addEventListener('DOMContentLoaded', function() {
-        var table = new Tabulator("#grid", {
-          data: {{.Items}},
+        table = new Tabulator("#grid", {
+          ajaxURL: "/api/listItems/{{.Id}}",
           layout: "fitColumns",
           columns: {{.Columns}},
           initialSort: [
