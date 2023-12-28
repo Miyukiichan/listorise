@@ -14,6 +14,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func Home(w http.ResponseWriter, r *http.Request) {
+	_getListById(w, 1)
+}
+
 func GetListItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -31,7 +35,7 @@ func GetListItems(w http.ResponseWriter, r *http.Request) {
 		AssociatedListName sql.NullString
 	}
 	rows, err := DB().Query(`
-		select i.Id, NoteId, AssociatedListId, n.Name as NoteName, l.Name as AssociatedListName 
+		select i.Id, NoteId, AssociatedListId, '📝 ' || n.Name as NoteName, '🗃️ ' || l.Name as AssociatedListName 
 		from ListItems as i 
 		left join Notes as n on n.Id = i.NoteId 
 		left join Lists as l on l.Id = i.AssociatedListId 
@@ -89,18 +93,11 @@ func GetListItems(w http.ResponseWriter, r *http.Request) {
 	w.Write(s)
 }
 
-func GetListById(w http.ResponseWriter, r *http.Request) {
+func _getListById(w http.ResponseWriter, id int) {
 	tmpl, err := template.ParseFiles("templates/list.html")
 	if err != nil {
 		log.Fatal(err)
 	}
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid list ID", http.StatusBadRequest)
-		return
-	}
-
 	// Get list name + check if list exists
 	var listName string
 	err = DB().QueryRow("select Name from Lists where Id = ?", id).Scan(&listName)
@@ -168,6 +165,16 @@ func GetListById(w http.ResponseWriter, r *http.Request) {
 	}
 	listDTO.Columns = template.JS(s)
 	tmpl.Execute(w, listDTO)
+}
+
+func GetListById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid list ID", http.StatusBadRequest)
+		return
+	}
+	_getListById(w, id)
 }
 
 func AddNote(w http.ResponseWriter, r *http.Request) {

@@ -58,10 +58,23 @@ func main() {
 		foreign key (ListColumnId) references ListColumns (Id)
 	)`)
 
+	var count int
+	err := db.QueryRow("select count(*) from Lists").Scan(&count)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if count == 0 {
+		_, err = db.Exec(`insert into Lists (Name) values ('Listorise')`)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/note/{id:[0-9]+}", handlers.GetNoteById).Methods("GET")
 	router.HandleFunc("/list/{id:[0-9]+}", handlers.GetListById).Methods("GET")
+	router.HandleFunc("/", handlers.Home).Methods("GET")
 	router.HandleFunc("/api/listItems/{id:[0-9]+}", handlers.GetListItems).Methods("GET")
 	router.HandleFunc("/api/note", handlers.AddNote).Methods("POST")
 	router.HandleFunc("/api/list", handlers.AddList).Methods("POST")
