@@ -108,6 +108,9 @@
           }
         })
       });
+      window.addEventListener("pageshow", (event) => {
+        table.setData();
+      })
     </script>
   </body>
 </html>

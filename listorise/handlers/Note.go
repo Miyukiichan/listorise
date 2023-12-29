@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -37,10 +38,28 @@ func GetNoteById(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	noteDTO := dto.NoteDTO{
-		Id:   note.ID,
+		Id:   noteID,
 		Name: note.Name.String,
 		Body: note.Body.String,
 	}
 	row.Close()
 	tmpl.Execute(w, noteDTO)
+}
+
+func UpdateNote(w http.ResponseWriter, r *http.Request) {
+	var noteDTO dto.NoteDTO
+	err := json.NewDecoder(r.Body).Decode(&noteDTO)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if noteDTO.Id == 0 {
+		http.Error(w, "No Note Id provided", http.StatusBadRequest)
+		return
+	}
+	_, err = DB().Exec("update Notes set Name = ?, Body = ? where Id = ?", noteDTO.Name, noteDTO.Body, noteDTO.Id)
+	if err != nil {
+		http.Error(w, "Error updating note", http.StatusInternalServerError)
+		return
+	}
 }

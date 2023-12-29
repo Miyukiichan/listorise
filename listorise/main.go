@@ -77,6 +77,7 @@ func main() {
 	router.HandleFunc("/", handlers.Home).Methods("GET")
 	router.HandleFunc("/api/listItems/{id:[0-9]+}", handlers.GetListItems).Methods("GET")
 	router.HandleFunc("/api/note", handlers.AddNote).Methods("POST")
+	router.HandleFunc("/api/note", handlers.UpdateNote).Methods("PUT")
 	router.HandleFunc("/api/list", handlers.AddList).Methods("POST")
 
 	http.Handle("/", router)
