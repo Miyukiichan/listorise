@@ -12,7 +12,7 @@ const (
 	Date
 	DateTime
 	CreatedDateTime
-	LastEditedEditedDateTime
+	LastEditedDateTime
 	Checkbox
 )
 

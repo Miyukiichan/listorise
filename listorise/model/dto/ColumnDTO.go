@@ -17,8 +17,9 @@ package dto
 // }
 
 type ColumnDTO struct {
-	Title   string `json:"title"`
-	Field   string `json:"field"`
-	Sorter  string `json:"sorter"`
-	Visible bool   `json:"visible"`
+	Title        string `json:"title"`
+	Field        string `json:"field"`
+	Sorter       string `json:"sorter"`
+	Visible      bool   `json:"visible"`
+	HeaderFilter bool   `json:"headerFilter"`
 }

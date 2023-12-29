@@ -116,10 +116,11 @@ func _getListById(w http.ResponseWriter, id int) {
 	var columns []entities.ListColumn
 	var columnDTOs []dto.ColumnDTO
 	columnDTOs = append(columnDTOs, dto.ColumnDTO{
-		Title:   "Name",
-		Field:   "-1",
-		Sorter:  "string",
-		Visible: true,
+		Title:        "Name",
+		Field:        "-1",
+		Sorter:       "string",
+		Visible:      true,
+		HeaderFilter: true,
 	})
 	columnDTOs = append(columnDTOs, dto.ColumnDTO{
 		Title:   "NoteId",
@@ -152,10 +153,11 @@ func _getListById(w http.ResponseWriter, id int) {
 		columnDTO := dto.ColumnDTO{
 			// Use the column Id as this is a unique name
 			// The name is never visible - it's an internal reference for the data objects in toast ui
-			Title:   column.Name,
-			Field:   strconv.Itoa(column.Id),
-			Sorter:  "string",
-			Visible: true,
+			Title:        column.Name,
+			Field:        strconv.Itoa(column.Id),
+			Sorter:       "string",
+			Visible:      true,
+			HeaderFilter: true,
 		}
 		columnDTOs = append(columnDTOs, columnDTO)
 	}
